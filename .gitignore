@@ -1,0 +1,22 @@
+# Secretos
+.env
+*.env.local
+backend/.env
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# Node / Angular
+node_modules/
+frontend/dist/
+frontend/.angular/
+frontend/.nx/
+
+# Editores / SO
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db

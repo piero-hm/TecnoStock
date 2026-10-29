@@ -1,0 +1,119 @@
+# =============================================================================
+# TecnoStock - Docker Compose
+# Funciona igual en Fedora (Docker Engine) y en Windows (Docker Desktop).
+#
+# Servicios (en orden de arranque):
+#   db        -> SQL Server 2022 (volumen persistente)
+#   db-init   -> ejecuta database/init/*.sql (tablas + procedimientos) y termina
+#   backend   -> FastAPI (espera a que db-init termine bien)
+#   frontend  -> Angular compilado + nginx (proxy /api -> backend)
+#
+# Uso:  cp .env.example .env   (edita las claves)   &&   docker compose up --build
+# Web:  http://localhost:8080        API/Swagger: http://localhost:8000/docs
+# =============================================================================
+name: tecnostock
+
+services:
+  # ---------------------------------------------------------------- SQL Server
+  db:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: tecnostock-db
+    restart: unless-stopped
+    environment:
+      ACCEPT_EULA: "Y"
+      MSSQL_PID: "Developer"
+      MSSQL_SA_PASSWORD: ${MSSQL_SA_PASSWORD:?Falta MSSQL_SA_PASSWORD en el archivo .env}
+    ports:
+      # Puerto del HOST configurable: en Windows el 1433 suele estar ocupado
+      # por un SQL Server local. Dentro de la red de Docker siempre es 1433.
+      - "${DB_PORT_HOST:-1433}:1433"
+    volumes:
+      # Volumen con nombre (no carpeta): evita problemas de permisos/SELinux
+      # en Fedora y de rendimiento en Windows.
+      - sqlserver_data:/var/opt/mssql
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "/opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P \"$$MSSQL_SA_PASSWORD\" -C -b -Q \"SELECT 1\" -o /dev/null",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 30s
+    networks: [tecnostock-net]
+
+  # ------------------------------------------------- Inicializacion de la BD
+  # Imagen propia (database/Dockerfile) que trae los .sql adentro, asi no
+  # dependemos de bind mounts. Es idempotente: se puede ejecutar N veces.
+  db-init:
+    build:
+      context: ./database
+    container_name: tecnostock-db-init
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DB_SERVER: db
+      DB_PORT: "1433"
+      DB_USER: sa
+      DB_PASS: ${MSSQL_SA_PASSWORD}
+      DB_NAME: ${DB_NAME:-TecnoStockDB}
+    restart: "no"
+    networks: [tecnostock-net]
+
+  # ------------------------------------------------------------------ Backend
+  backend:
+    build:
+      context: ./backend
+    container_name: tecnostock-backend
+    restart: unless-stopped
+    depends_on:
+      db-init:
+        condition: service_completed_successfully
+    environment:
+      DB_SERVER: db
+      DB_PORT: "1433"
+      DB_USER: sa
+      DB_PASS: ${MSSQL_SA_PASSWORD}
+      DB_NAME: ${DB_NAME:-TecnoStockDB}
+      JWT_SECRET: ${JWT_SECRET:?Falta JWT_SECRET en el archivo .env}
+      JWT_EXPIRE_MINUTES: ${JWT_EXPIRE_MINUTES:-480}
+      CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:8080,http://localhost:4200}
+      ADMIN_USERNAME: ${ADMIN_USERNAME:-admin}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:?Falta ADMIN_PASSWORD en el archivo .env}
+      ADMIN_NOMBRE: ${ADMIN_NOMBRE:-Administrador}
+    ports:
+      - "${BACKEND_PORT:-8000}:8000"
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "python",
+          "-c",
+          "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 15s
+    networks: [tecnostock-net]
+
+  # ----------------------------------------------------------------- Frontend
+  frontend:
+    build:
+      context: ./frontend
+    container_name: tecnostock-frontend
+    restart: unless-stopped
+    depends_on:
+      backend:
+        condition: service_healthy
+    ports:
+      - "${FRONTEND_PORT:-8080}:80"
+    networks: [tecnostock-net]
+
+volumes:
+  sqlserver_data:
+
+networks:
+  tecnostock-net:
