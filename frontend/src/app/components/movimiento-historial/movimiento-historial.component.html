@@ -1,0 +1,70 @@
+<div class="container-fluid">
+  <h2 class="mb-3">Historial de movimientos</h2>
+
+  <div class="card shadow-sm mb-3">
+    <div class="card-body">
+      <div class="row g-2 align-items-end">
+        <div class="col-12 col-md-3">
+          <label class="form-label">Producto</label>
+          <select class="form-select" (change)="productoId.set($any($event.target).value ? toNumber($any($event.target).value) : null)">
+            <option value="">Todos</option>
+            @for (p of productos(); track p.id) {
+              <option [value]="p.id">{{ p.codigo }} - {{ p.nombre }}</option>
+            }
+          </select>
+        </div>
+        <div class="col-12 col-md-2">
+          <label class="form-label">Desde</label>
+          <input type="date" class="form-control" (change)="fechaDesde.set($any($event.target).value)" />
+        </div>
+        <div class="col-12 col-md-2">
+          <label class="form-label">Hasta</label>
+          <input type="date" class="form-control" (change)="fechaHasta.set($any($event.target).value)" />
+        </div>
+        <div class="col-12 col-md-2">
+          <label class="form-label">Tipo</label>
+          <select class="form-select" (change)="tipo.set($any($event.target).value)">
+            <option value="">Todos</option>
+            <option value="ENTRADA">Entrada</option>
+            <option value="SALIDA">Salida</option>
+          </select>
+        </div>
+        <div class="col-12 col-md-3">
+          <button class="btn btn-primary w-100" (click)="buscar()" [disabled]="filtroInvalido()">Buscar</button>
+        </div>
+      </div>
+      @if (filtroInvalido()) {
+        <div class="text-danger small mt-2">La fecha desde debe ser menor o igual a hasta.</div>
+      }
+    </div>
+  </div>
+
+  @if (cargando()) {
+    <div class="text-center py-4"><span class="spinner-border"></span></div>
+  } @else if (movimientos().length === 0) {
+    <div class="alert alert-info">Sin movimientos.</div>
+  } @else {
+    <div class="table-responsive">
+      <table class="table table-hover align-middle">
+        <thead>
+          <tr>
+            <th>Fecha</th><th>Tipo</th><th>Producto</th><th>Cantidad</th><th>Stock ant.</th><th>Stock post.</th><th>Motivo</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (m of movimientos(); track m.id) {
+            <tr>
+              <td>{{ m.fecha | date:'short' }}</td>
+              <td><span class="badge" [class.text-bg-success]="m.tipo === 'ENTRADA'" [class.text-bg-warning]="m.tipo === 'SALIDA'">{{ m.tipo }}</span></td>
+              <td>{{ m.producto_codigo }}</td>
+              <td>{{ m.cantidad }}</td>
+              <td>{{ m.stock_anterior }}</td>
+              <td>{{ m.stock_posterior }}</td>
+              <td>{{ m.motivo }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</div>

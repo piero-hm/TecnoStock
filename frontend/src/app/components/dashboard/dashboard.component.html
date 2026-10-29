@@ -1,0 +1,97 @@
+<div class="container-fluid">
+  <h2 class="mb-3">Dashboard</h2>
+
+  @if (indicadores(); as d) {
+    <div class="row g-3 mb-4">
+      <div class="col-12 col-sm-6 col-lg-3">
+        <div class="card shadow-sm h-100">
+          <div class="card-body">
+            <div class="text-muted small">Productos activos</div>
+            <div class="fs-3 fw-bold">{{ d.productos_activos }}</div>
+          </div>
+        </div>
+      </div>
+      <div class="col-12 col-sm-6 col-lg-3">
+        <div class="card shadow-sm h-100">
+          <div class="card-body">
+            <div class="text-muted small">Productos con stock bajo</div>
+            <div class="fs-3 fw-bold text-danger">{{ d.productos_stock_bajo }}</div>
+          </div>
+        </div>
+      </div>
+      <div class="col-12 col-sm-6 col-lg-3">
+        <div class="card shadow-sm h-100">
+          <div class="card-body">
+            <div class="text-muted small">Valor inventario (costo)</div>
+            <div class="fs-5 fw-bold">{{ moneda(d.valor_inventario_compra) }}</div>
+          </div>
+        </div>
+      </div>
+      <div class="col-12 col-sm-6 col-lg-3">
+        <div class="card shadow-sm h-100">
+          <div class="card-body">
+            <div class="text-muted small">Valor inventario (venta)</div>
+            <div class="fs-5 fw-bold">{{ moneda(d.valor_inventario_venta) }}</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  }
+
+  <div class="row g-3">
+    <div class="col-12 col-lg-6">
+      <div class="card shadow-sm h-100">
+        <div class="card-header bg-white fw-semibold">Productos con stock bajo</div>
+        <div class="card-body p-0">
+          @if (stockBajo().length === 0) {
+            <p class="text-muted p-3 mb-0">Sin productos con stock bajo.</p>
+          } @else {
+            <div class="table-responsive">
+              <table class="table table-hover mb-0">
+                <thead><tr><th>Código</th><th>Nombre</th><th>Stock</th><th>Mínimo</th></tr></thead>
+                <tbody>
+                  @for (p of stockBajo(); track p.id) {
+                    <tr>
+                      <td>{{ p.codigo }}</td>
+                      <td>{{ p.nombre }}</td>
+                      <td><span class="badge text-bg-danger">{{ p.stock_actual }}</span></td>
+                      <td>{{ p.stock_minimo }}</td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+    <div class="col-12 col-lg-6">
+      <div class="card shadow-sm h-100">
+        <div class="card-header bg-white fw-semibold">Últimos movimientos</div>
+        <div class="card-body p-0">
+          @if (ultimos().length === 0) {
+            <p class="text-muted p-3 mb-0">Sin movimientos.</p>
+          } @else {
+            <div class="table-responsive">
+              <table class="table table-hover mb-0">
+                <thead><tr><th>Tipo</th><th>Producto</th><th>Cantidad</th><th>Fecha</th></tr></thead>
+                <tbody>
+                  @for (m of ultimos(); track m.id) {
+                    <tr>
+                      <td>
+                        <span class="badge" [class.text-bg-success]="m.tipo === 'ENTRADA'" [class.text-bg-warning]="m.tipo === 'SALIDA'">{{ m.tipo }}</span>
+                      </td>
+                      <td>{{ m.producto_codigo }}</td>
+                      <td>{{ m.cantidad }}</td>
+                      <td>{{ m.fecha | date:'short' }}</td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

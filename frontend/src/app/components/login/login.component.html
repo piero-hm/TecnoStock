@@ -1,0 +1,41 @@
+<div class="container">
+  <div class="row justify-content-center mt-5">
+    <div class="col-12 col-sm-8 col-md-5">
+      <div class="card shadow-sm">
+        <div class="card-body p-4">
+          <h1 class="h4 mb-3 text-center">TecnoStock</h1>
+          <p class="text-muted text-center mb-4">Iniciar sesión</p>
+
+          @if (error()) {
+            <div class="alert alert-danger">{{ error() }}</div>
+          }
+
+          <form (submit)="onSubmit(); $event.preventDefault()">
+            <div class="mb-3">
+              <label class="form-label" for="username">Usuario</label>
+              <input id="username" type="text" class="form-control"
+                     [class.is-invalid]="loginForm.username().touched() && loginForm.username().invalid()"
+                     [formField]="loginForm.username" />
+              @if (loginForm.username().touched() && loginForm.username().invalid()) {
+                <div class="invalid-feedback d-block">{{ loginForm.username().errors()?.[0]?.message }}</div>
+              }
+            </div>
+            <div class="mb-3">
+              <label class="form-label" for="password">Contraseña</label>
+              <input id="password" type="password" class="form-control"
+                     [class.is-invalid]="loginForm.password().touched() && loginForm.password().invalid()"
+                     [formField]="loginForm.password" />
+              @if (loginForm.password().touched() && loginForm.password().invalid()) {
+                <div class="invalid-feedback d-block">{{ loginForm.password().errors()?.[0]?.message }}</div>
+              }
+            </div>
+            <button type="submit" class="btn btn-primary w-100" [disabled]="cargando()">
+              @if (cargando()) { <span class="spinner-border spinner-border-sm me-2"></span> }
+              Ingresar
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

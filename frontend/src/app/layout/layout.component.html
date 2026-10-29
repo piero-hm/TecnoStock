@@ -1,0 +1,38 @@
+<header class="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm">
+  <div class="container-fluid">
+    <a class="navbar-brand fw-bold" routerLink="/dashboard" (click)="cerrarMenu()">TecnoStock</a>
+    <button class="navbar-toggler" type="button" (click)="toggleMenu()" aria-label="Menú">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" [class.show]="menuAbierto()">
+      <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+        <li class="nav-item"><a class="nav-link" routerLink="/dashboard" routerLinkActive="active" (click)="cerrarMenu()">Dashboard</a></li>
+        <li class="nav-item"><a class="nav-link" routerLink="/productos" routerLinkActive="active" (click)="cerrarMenu()">Productos</a></li>
+        <li class="nav-item"><a class="nav-link" routerLink="/categorias" routerLinkActive="active" (click)="cerrarMenu()">Categorías</a></li>
+        <li class="nav-item"><a class="nav-link" routerLink="/movimientos/entrada" routerLinkActive="active" (click)="cerrarMenu()">Entrada</a></li>
+        <li class="nav-item"><a class="nav-link" routerLink="/movimientos/salida" routerLinkActive="active" (click)="cerrarMenu()">Salida</a></li>
+        <li class="nav-item"><a class="nav-link" routerLink="/movimientos" routerLinkActive="active" (click)="cerrarMenu()">Historial</a></li>
+        <li class="nav-item"><a class="nav-link" routerLink="/stock-bajo" routerLinkActive="active" (click)="cerrarMenu()">Stock bajo</a></li>
+      </ul>
+      <div class="d-flex align-items-center gap-2 text-white">
+        <span class="small">{{ usuario()?.nombre_completo }}</span>
+        <button class="btn btn-outline-light btn-sm" (click)="logout()">Cerrar sesión</button>
+      </div>
+    </div>
+  </div>
+</header>
+<main class="container-fluid py-3">
+  <router-outlet></router-outlet>
+</main>
+
+<div class="toast-container position-fixed bottom-0 end-0 p-3">
+  @for (t of notificaciones.toasts(); track t.id) {
+    <div class="toast show" role="alert">
+      <div class="toast-header" [class.text-bg-danger]="t.tipo === 'danger'" [class.text-bg-success]="t.tipo === 'success'" [class.text-bg-warning]="t.tipo === 'warning'">
+        <strong class="me-auto">TecnoStock</strong>
+        <button type="button" class="btn-close" (click)="notificaciones.cerrar(t.id)"></button>
+      </div>
+      <div class="toast-body">{{ t.mensaje }}</div>
+    </div>
+  }
+</div>
