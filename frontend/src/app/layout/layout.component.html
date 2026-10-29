@@ -1,34 +1,90 @@
-<header class="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm">
-  <div class="container-fluid">
-    <a class="navbar-brand fw-bold" routerLink="/dashboard" (click)="cerrarMenu()">TecnoStock</a>
-    <button class="navbar-toggler" type="button" (click)="toggleMenu()" aria-label="Menú">
-      <span class="navbar-toggler-icon"></span>
-    </button>
-    <div class="collapse navbar-collapse" [class.show]="menuAbierto()">
-      <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-        <li class="nav-item"><a class="nav-link" routerLink="/dashboard" routerLinkActive="active" (click)="cerrarMenu()">Dashboard</a></li>
-        <li class="nav-item"><a class="nav-link" routerLink="/productos" routerLinkActive="active" (click)="cerrarMenu()">Productos</a></li>
-        <li class="nav-item"><a class="nav-link" routerLink="/categorias" routerLinkActive="active" (click)="cerrarMenu()">Categorías</a></li>
-        <li class="nav-item"><a class="nav-link" routerLink="/movimientos/entrada" routerLinkActive="active" (click)="cerrarMenu()">Entrada</a></li>
-        <li class="nav-item"><a class="nav-link" routerLink="/movimientos/salida" routerLinkActive="active" (click)="cerrarMenu()">Salida</a></li>
-        <li class="nav-item"><a class="nav-link" routerLink="/movimientos" routerLinkActive="active" (click)="cerrarMenu()">Historial</a></li>
-        <li class="nav-item"><a class="nav-link" routerLink="/stock-bajo" routerLinkActive="active" (click)="cerrarMenu()">Stock bajo</a></li>
-      </ul>
-      <div class="d-flex align-items-center gap-2 text-white">
-        <span class="small">{{ usuario()?.nombre_completo }}</span>
-        <button class="btn btn-outline-light btn-sm" (click)="logout()">Cerrar sesión</button>
-      </div>
-    </div>
-  </div>
-</header>
-<main class="container-fluid py-3">
-  <router-outlet></router-outlet>
-</main>
+<div class="app-shell">
+  <!-- Overlay móvil -->
+  <div class="sidebar-overlay" [class.open]="menuAbierto()" (click)="cerrarMenu()"></div>
 
-<div class="toast-container position-fixed bottom-0 end-0 p-3">
+  <!-- Sidebar -->
+  <aside class="sidebar" [class.open]="menuAbierto()">
+    <div class="sidebar-brand">
+      <span class="brand-icon"><i class="bi bi-cpu"></i></span>
+      <span>TecnoStock</span>
+    </div>
+
+    <div class="sidebar-section">Principal</div>
+    <a class="sidebar-link" routerLink="/dashboard" routerLinkActive="active" (click)="cerrarMenu()">
+      <i class="bi bi-speedometer2"></i> Dashboard
+    </a>
+
+    <div class="sidebar-section">Inventario</div>
+    <a class="sidebar-link" routerLink="/productos" routerLinkActive="active" (click)="cerrarMenu()">
+      <i class="bi bi-box-seam"></i> Productos
+    </a>
+    <a class="sidebar-link" routerLink="/categorias" routerLinkActive="active" (click)="cerrarMenu()">
+      <i class="bi bi-tags"></i> Categorías
+    </a>
+
+    <div class="sidebar-section">Movimientos</div>
+    <a class="sidebar-link" routerLink="/movimientos/entrada" routerLinkActive="active" (click)="cerrarMenu()">
+      <i class="bi bi-arrow-down-circle"></i> Entrada
+    </a>
+    <a class="sidebar-link" routerLink="/movimientos/salida" routerLinkActive="active" (click)="cerrarMenu()">
+      <i class="bi bi-arrow-up-circle"></i> Salida
+    </a>
+    <a class="sidebar-link" routerLink="/movimientos" routerLinkActive="active" (click)="cerrarMenu()">
+      <i class="bi bi-clock-history"></i> Historial
+    </a>
+
+    <div class="sidebar-section">Alertas</div>
+    <a class="sidebar-link" routerLink="/stock-bajo" routerLinkActive="active" (click)="cerrarMenu()">
+      <i class="bi bi-exclamation-triangle"></i> Stock bajo
+      @if (stockBajoCount() > 0) {
+        <span class="sidebar-badge">{{ stockBajoCount() }}</span>
+      }
+    </a>
+
+    <div class="sidebar-footer">
+      <a class="sidebar-link" (click)="logout(); cerrarMenu()">
+        <i class="bi bi-box-arrow-right"></i> Cerrar sesión
+      </a>
+    </div>
+  </aside>
+
+  <!-- Área principal -->
+  <div class="main-area">
+    <header class="topbar">
+      <div class="d-flex align-items-center gap-2">
+        <button class="btn btn-light hamburger" (click)="toggleMenu()" aria-label="Abrir menú">
+          <i class="bi bi-list"></i>
+        </button>
+        <h1 class="topbar-title mb-0">Panel de inventario</h1>
+      </div>
+      <div class="topbar-user">
+        <div class="text-end d-none d-sm-block">
+          <div class="fw-semibold small">{{ usuario()?.nombre_completo }}</div>
+          <div class="text-muted" style="font-size:11px">{{ usuario()?.username }}</div>
+        </div>
+        <span class="avatar">{{ iniciales() }}</span>
+      </div>
+    </header>
+
+    <main class="content">
+      <router-outlet></router-outlet>
+    </main>
+  </div>
+</div>
+
+<!-- Toasts -->
+<div class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index: var(--z-toast);">
   @for (t of notificaciones.toasts(); track t.id) {
-    <div class="toast show" role="alert">
-      <div class="toast-header" [class.text-bg-danger]="t.tipo === 'danger'" [class.text-bg-success]="t.tipo === 'success'" [class.text-bg-warning]="t.tipo === 'warning'">
+    <div class="toast show mb-2" role="alert">
+      <div class="toast-header">
+        <i class="bi me-2" [class.bi-check-circle-fill]="t.tipo === 'success'"
+           [class.text-success]="t.tipo === 'success'"
+           [class.bi-x-circle-fill]="t.tipo === 'danger'"
+           [class.text-danger]="t.tipo === 'danger'"
+           [class.bi-exclamation-triangle-fill]="t.tipo === 'warning'"
+           [class.text-warning]="t.tipo === 'warning'"
+           [class.bi-info-circle-fill]="t.tipo === 'info'"
+           [class.text-info]="t.tipo === 'info'"></i>
         <strong class="me-auto">TecnoStock</strong>
         <button type="button" class="btn-close" (click)="notificaciones.cerrar(t.id)"></button>
       </div>
