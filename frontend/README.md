@@ -1,59 +1,67 @@
-# TecnostockWeb
+# TecnoStock Frontend
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 22.2.5.
+Frontend web del sistema de inventario TecnoStock S.A.C., construido con **Angular 22** (componentes standalone) y estilizado con **Bootstrap 5.3** (CDN) más CSS propio con tema oscuro moderno.
 
-## Development server
+## Arquitectura
 
-To start a local development server, run:
+Estructura principal en `src/app/`:
 
-```bash
-ng serve
-```
+- `interfaces/`: tipos TypeScript que reflejan los JSON de la API (snake_case).
+- `services/`: un servicio por recurso (`AuthService`, `ProductoService`, `CategoriaService`, `MovimientoService`, `DashboardService`, `NotificacionService`, `ConfirmacionService`). Es el **único** lugar que usa `HttpClient`.
+- `core/`: `authGuard`, `authInterceptor`, `errorInterceptor`.
+- `layout/`: shell de la aplicación (sidebar fija/off-canvas, topbar, toasts y modal de confirmación).
+- `components/`: pantallas por feature, cada una con `.ts`, `.html` y `.css`.
+- `environments/`: `environment.ts` (desarrollo) y `environment.prod.ts` (producción) con `apiUrl`.
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
+Flujo: componente → llama a service → service usa `HttpClient` con `environment.apiUrl`. Tras crear/editar/desactivar/registrar, se vuelve a pedir el listado a la API.
 
-## Code scaffolding
+## Formularios
 
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
+Se usan **exclusivamente Signal Forms** (`@angular/forms/signals`: `form()`, `FormField`, validadores `required`, `min`, `max`, etc.) y la directiva `[formField]` en el HTML.
+Prohibido: Reactive Forms, `ngModel`, `FormsModule`, `ReactiveFormsModule`.
 
-```bash
-ng generate component component-name
-```
+## Estado
 
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
+Se usa `signal`, `computed` y `effect` solo cuando es necesario. Las agregaciones del dashboard (por día y por categoría) se calculan en `DashboardAgregacionService` con `computed`.
 
-```bash
-ng generate --help
-```
+## Gráficos
 
-## Building
+No se usan librerías de gráficos. Los gráficos son componentes standalone propios con SVG:
+- `grafico-area`: entradas vs. salidas por día, con tooltip y selector de rango.
+- `grafico-donut`: valor de inventario por categoría.
 
-To build the project run:
+Ambos incluyen `role="img"`, `aria-label` y una tabla/lista alternativa visualmente oculta (`visually-hidden`) para accesibilidad.
 
-```bash
-ng build
-```
-
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
-
-## Running unit tests
-
-To execute unit tests with the [Vitest](https://vitest.dev/) test runner, use the following command:
+## Comandos
 
 ```bash
-ng test
+npm start        # servidor de desarrollo (ng serve) en http://localhost:4200
+npm run build    # build de producción
+npm test         # tests con Vitest
 ```
 
-## Running end-to-end tests
+## Entornos
 
-For end-to-end (e2e) testing, run:
+- Desarrollo (`environment.ts`): `apiUrl: 'http://localhost:8000/api/v1'`
+- Producción (`environment.prod.ts`): `apiUrl: '/api/v1'` (nginx reenvía `/api/` al backend)
 
-```bash
-ng e2e
-```
+## Rutas principales
 
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
+- `/login`
+- `/dashboard`
+- `/productos`, `/productos/nuevo`, `/productos/:id/editar`
+- `/categorias`
+- `/movimientos/entrada`, `/movimientos/salida`, `/movimientos`
+- `/stock-bajo`
 
-## Additional Resources
+## Accesibilidad y responsive
 
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+- Contraste AA verificado, `:focus-visible` con anillo lima, respeta `prefers-reduced-motion`.
+- Responsive en 360, 768, 1280 y 1920 px; tablas como tarjetas apiladas en móvil.
+- Sin scroll horizontal de página.
+
+## Notas
+
+- No se agregan menús ni pantallas que no existan en la API.
+- Ningún dato de negocio está quemado en el frontend; todo proviene de la API.
+- Los estilos siguen el sistema de diseño definido en `src/styles.css` (tokens → base → layout → componentes → utilidades).

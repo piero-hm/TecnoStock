@@ -1,61 +1,113 @@
 <div class="container-fluid">
-  <h2 class="mb-3">Dashboard</h2>
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">Dashboard</h1>
+      <p class="page-subtitle">Resumen del inventario</p>
+    </div>
+  </div>
 
-  @if (indicadores(); as d) {
+  <!-- KPI -->
+  @if (agg.cargando() && !agg.indicadores()) {
+    <div class="row g-3 mb-4">
+      @for (i of [1,2,3,4]; track i) {
+        <div class="col-12 col-sm-6 col-lg-3">
+          <div class="kpi-card">
+            <div class="skeleton" style="width:40px;height:40px;border-radius:10px;margin-bottom:12px"></div>
+            <div class="skeleton" style="width:60%;height:28px;margin-bottom:8px"></div>
+            <div class="skeleton" style="width:80%;height:14px"></div>
+          </div>
+        </div>
+      }
+    </div>
+  } @else if (agg.indicadores(); as d) {
     <div class="row g-3 mb-4">
       <div class="col-12 col-sm-6 col-lg-3">
-        <div class="card shadow-sm h-100">
-          <div class="card-body">
-            <div class="text-muted small">Productos activos</div>
-            <div class="fs-3 fw-bold">{{ d.productos_activos }}</div>
-          </div>
+        <div class="kpi-card kpi-card-celeste">
+          <div class="kpi-label">Productos activos</div>
+          <div class="kpi-value">{{ d.productos_activos }}</div>
         </div>
       </div>
       <div class="col-12 col-sm-6 col-lg-3">
-        <div class="card shadow-sm h-100">
-          <div class="card-body">
-            <div class="text-muted small">Productos con stock bajo</div>
-            <div class="fs-3 fw-bold text-danger">{{ d.productos_stock_bajo }}</div>
-          </div>
+        <div class="kpi-card kpi-card-ambar">
+          <div class="kpi-label">Stock bajo</div>
+          <div class="kpi-value">{{ d.productos_stock_bajo }}</div>
         </div>
       </div>
       <div class="col-12 col-sm-6 col-lg-3">
-        <div class="card shadow-sm h-100">
-          <div class="card-body">
-            <div class="text-muted small">Valor inventario (costo)</div>
-            <div class="fs-5 fw-bold">{{ moneda(d.valor_inventario_compra) }}</div>
-          </div>
+        <div class="kpi-card kpi-card-esmeralda">
+          <div class="kpi-label">Valor a costo</div>
+          <div class="kpi-value">{{ moneda(d.valor_inventario_compra) }}</div>
         </div>
       </div>
       <div class="col-12 col-sm-6 col-lg-3">
-        <div class="card shadow-sm h-100">
-          <div class="card-body">
-            <div class="text-muted small">Valor inventario (venta)</div>
-            <div class="fs-5 fw-bold">{{ moneda(d.valor_inventario_venta) }}</div>
-          </div>
+        <div class="kpi-card kpi-card-lima">
+          <div class="kpi-label">Valor a venta</div>
+          <div class="kpi-value">{{ moneda(d.valor_inventario_venta) }}</div>
         </div>
       </div>
     </div>
   }
 
-  <div class="row g-3">
-    <div class="col-12 col-lg-6">
-      <div class="card shadow-sm h-100">
-        <div class="card-header bg-white fw-semibold">Productos con stock bajo</div>
+  <!-- Gráfico área + donut -->
+  <div class="row g-3 mb-4">
+    <div class="col-12 col-lg-8">
+      <div class="card h-100">
+        <div class="card-body">
+          <div class="d-flex flex-wrap justify-content-between align-items-center mb-3 gap-2">
+            <h3 class="h6 mb-0">Entradas vs. salidas</h3>
+            <div class="btn-group btn-group-sm" role="group">
+              <button class="btn" [class.btn-primary]="rango() === 7" [class.btn-outline-secondary]="rango() !== 7" (click)="cambiarRango(7)">7 días</button>
+              <button class="btn" [class.btn-primary]="rango() === 30" [class.btn-outline-secondary]="rango() !== 30" (click)="cambiarRango(30)">30 días</button>
+              <button class="btn" [class.btn-primary]="rango() === 90" [class.btn-outline-secondary]="rango() !== 90" (click)="cambiarRango(90)">90 días</button>
+            </div>
+          </div>
+          <app-grafico-area [datos]="areaDatos()" ariaLabel="Entradas versus salidas por día"></app-grafico-area>
+        </div>
+      </div>
+    </div>
+    <div class="col-12 col-lg-4">
+      <div class="card h-100">
+        <div class="card-body">
+          <h3 class="h6 mb-3">Valor de inventario por categoría</h3>
+          <app-grafico-donut [datos]="donutDatos()" ariaLabel="Valor de inventario por categoría"></app-grafico-donut>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Stock bajo + últimos movimientos -->
+  <div class="row g-3 mb-4">
+    <div class="col-12 col-lg-7">
+      <div class="card h-100">
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <span>Productos con stock bajo</span>
+          <a class="btn btn-sm btn-outline-secondary" routerLink="/stock-bajo">Ver todos</a>
+        </div>
         <div class="card-body p-0">
-          @if (stockBajo().length === 0) {
-            <p class="text-muted p-3 mb-0">Sin productos con stock bajo.</p>
+          @if (agg.stockBajo().length === 0) {
+            <div class="empty-state"><i class="bi bi-check-circle"></i><p>Sin productos con stock bajo.</p></div>
           } @else {
             <div class="table-responsive">
-              <table class="table table-hover mb-0">
-                <thead><tr><th>Código</th><th>Nombre</th><th>Stock</th><th>Mínimo</th></tr></thead>
+              <table class="table table-hover align-middle mb-0">
+                <thead><tr><th>Código</th><th>Nombre</th><th>Categoría</th><th>Nivel</th><th>Stock</th><th>Mín.</th><th></th></tr></thead>
                 <tbody>
-                  @for (p of stockBajo(); track p.id) {
+                  @for (p of agg.stockBajo(); track p.id) {
                     <tr>
                       <td>{{ p.codigo }}</td>
                       <td>{{ p.nombre }}</td>
-                      <td><span class="badge text-bg-danger">{{ p.stock_actual }}</span></td>
+                      <td>{{ p.categoria_nombre }}</td>
+                      <td>
+                        <div class="stock-bar" [class.stock-bar-ok]="colorNivel(p) === 'ok'" [class.stock-bar-warn]="colorNivel(p) === 'warn'" [class.stock-bar-danger]="colorNivel(p) === 'danger'">
+                          <span [style.width.%]="nivelStock(p)"></span>
+                        </div>
+                      </td>
+                      <td><span class="badge" [class.text-bg-danger]="p.stock_actual === 0" [class.text-bg-warning]="p.stock_actual > 0">{{ p.stock_actual }}</span></td>
                       <td>{{ p.stock_minimo }}</td>
+                      <td class="text-end">
+                        <a class="btn btn-sm btn-outline-primary" routerLink="/movimientos/entrada" title="Reponer" aria-label="Reponer producto">
+                          <i class="bi bi-plus-lg"></i> Reponer
+                        </a>
+                      </td>
                     </tr>
                   }
                 </tbody>
@@ -65,31 +117,59 @@
         </div>
       </div>
     </div>
-    <div class="col-12 col-lg-6">
-      <div class="card shadow-sm h-100">
-        <div class="card-header bg-white fw-semibold">Últimos movimientos</div>
+    <div class="col-12 col-lg-5">
+      <div class="card h-100">
+        <div class="card-header">Últimos movimientos</div>
         <div class="card-body p-0">
-          @if (ultimos().length === 0) {
-            <p class="text-muted p-3 mb-0">Sin movimientos.</p>
+          @if (agg.ultimos().length === 0) {
+            <div class="empty-state"><i class="bi bi-inbox"></i><p>Sin movimientos.</p></div>
           } @else {
-            <div class="table-responsive">
-              <table class="table table-hover mb-0">
-                <thead><tr><th>Tipo</th><th>Producto</th><th>Cantidad</th><th>Fecha</th></tr></thead>
-                <tbody>
-                  @for (m of ultimos(); track m.id) {
-                    <tr>
-                      <td>
-                        <span class="badge" [class.text-bg-success]="m.tipo === 'ENTRADA'" [class.text-bg-warning]="m.tipo === 'SALIDA'">{{ m.tipo }}</span>
-                      </td>
-                      <td>{{ m.producto_codigo }}</td>
-                      <td>{{ m.cantidad }}</td>
-                      <td>{{ m.fecha | date:'short' }}</td>
-                    </tr>
-                  }
-                </tbody>
-              </table>
-            </div>
+            <ul class="list-group list-group-flush">
+              @for (m of agg.ultimos(); track m.id) {
+                <li class="list-group-item d-flex align-items-center gap-3" style="background:transparent;border-color:var(--color-border)">
+                  <span class="rounded-circle d-inline-flex align-items-center justify-content-center" style="width:36px;height:36px"
+                        [style.background]="m.tipo === 'ENTRADA' ? 'var(--color-success-soft)' : 'var(--color-warning-soft)'"
+                        [style.color]="m.tipo === 'ENTRADA' ? 'var(--color-success)' : 'var(--color-warning)'">
+                    <i class="bi" [class.bi-arrow-down]="m.tipo === 'ENTRADA'" [class.bi-arrow-up]="m.tipo === 'SALIDA'"></i>
+                  </span>
+                  <div class="flex-grow-1 min-w-0">
+                    <div class="fw-semibold small text-truncate">{{ m.producto_codigo }} · {{ m.producto_nombre }}</div>
+                    <div class="text-secondary small text-truncate">{{ m.motivo }}</div>
+                  </div>
+                  <div class="text-end">
+                    <div class="fw-bold" [style.color]="m.tipo === 'ENTRADA' ? 'var(--color-success)' : 'var(--color-warning)'">
+                      {{ m.tipo === 'ENTRADA' ? '+' : '−' }}{{ m.cantidad }}
+                    </div>
+                    <div class="text-secondary small">{{ formatearFechaHora(m.fecha) }}</div>
+                  </div>
+                </li>
+              }
+            </ul>
           }
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Reposición urgente -->
+  <div class="row g-3">
+    <div class="col-12 col-lg-4">
+      <div class="card h-100">
+        <div class="card-body">
+          <h3 class="h6 mb-2">Reposición urgente</h3>
+          <div class="kpi-value mb-2">{{ agg.reposicionUrgente().sinStock }}</div>
+          <div class="kpi-label mb-3">Productos sin stock</div>
+          @if (agg.reposicionUrgente().top.length > 0) {
+            <ul class="list-unstyled mb-3">
+              @for (x of agg.reposicionUrgente().top; track x.producto.id) {
+                <li class="d-flex justify-content-between small mb-1">
+                  <span class="text-truncate">{{ x.producto.nombre }}</span>
+                  <span class="text-danger fw-semibold">faltan {{ x.faltante }}</span>
+                </li>
+              }
+            </ul>
+          }
+          <a class="btn btn-primary w-100" routerLink="/movimientos/entrada">Registrar entrada</a>
         </div>
       </div>
     </div>

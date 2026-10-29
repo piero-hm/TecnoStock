@@ -1,0 +1,45 @@
+<div class="chart-card">
+  @if (vacio()) {
+    <div class="empty-state">
+      <i class="bi bi-pie-chart"></i>
+      <p>Sin datos de inventario.</p>
+    </div>
+  } @else {
+    <div class="donut-wrap" role="img" [attr.aria-label]="ariaLabel()">
+      <svg viewBox="0 0 200 200" class="donut-svg">
+        <circle cx="100" cy="100" r="70" fill="none" stroke="#26352f" stroke-width="22" />
+        @for (p of porciones(); track p.nombre) {
+          <circle cx="100" cy="100" r="70" fill="none" [attr.stroke]="p.color" stroke-width="22"
+                  [attr.stroke-dasharray]="p.dash + ' ' + (circunferencia - p.dash)"
+                  [attr.stroke-dashoffset]="-p.offset"
+                  transform="rotate(-90 100 100)" />
+        }
+        <text x="100" y="95" text-anchor="middle" class="donut-total">{{ formatearMoneda(total()) }}</text>
+        <text x="100" y="115" text-anchor="middle" class="donut-sub">Total</text>
+      </svg>
+      <ul class="donut-legend">
+        @for (p of porciones(); track p.nombre) {
+          <li>
+            <span class="legend-dot" [style.background]="p.color"></span>
+            <div class="legend-name-wrap">
+              <span class="legend-name">{{ p.nombre }}</span>
+              <div class="legend-bar"><span [style.width.%]="p.frac * 100" [style.background]="p.color"></span></div>
+            </div>
+            <span class="legend-value">{{ formatearMoneda(p.valor) }}</span>
+            <span class="legend-pct">{{ formatearPorcentaje(p.frac) }}</span>
+          </li>
+        }
+      </ul>
+    </div>
+  }
+
+  <table class="visually-hidden">
+    <caption>Valor de inventario por categoría</caption>
+    <thead><tr><th>Categoría</th><th>Valor</th><th>Porcentaje</th></tr></thead>
+    <tbody>
+      @for (p of porciones(); track p.nombre) {
+        <tr><td>{{ p.nombre }}</td><td>{{ p.valor }}</td><td>{{ (p.frac*100).toFixed(1) }}%</td></tr>
+      }
+    </tbody>
+  </table>
+</div>

@@ -1,36 +1,44 @@
 <div class="container-fluid">
-  <h2 class="mb-3">Historial de movimientos</h2>
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">Historial de movimientos</h1>
+      <p class="page-subtitle">Consulta los movimientos registrados</p>
+    </div>
+  </div>
 
-  <div class="card shadow-sm mb-3">
+  <div class="card mb-3">
     <div class="card-body">
-      <div class="row g-2 align-items-end">
-        <div class="col-12 col-md-3">
+      <div class="filter-bar">
+        <div>
           <label class="form-label">Producto</label>
-          <select class="form-select" (change)="productoId.set($any($event.target).value ? toNumber($any($event.target).value) : null)">
+          <select class="form-select" [value]="productoId() ?? ''" (change)="productoId.set($any($event.target).value ? toNumber($any($event.target).value) : null)">
             <option value="">Todos</option>
             @for (p of productos(); track p.id) {
               <option [value]="p.id">{{ p.codigo }} - {{ p.nombre }}</option>
             }
           </select>
         </div>
-        <div class="col-12 col-md-2">
+        <div>
           <label class="form-label">Desde</label>
-          <input type="date" class="form-control" (change)="fechaDesde.set($any($event.target).value)" />
+          <input type="date" class="form-control" [value]="fechaDesde()" (change)="fechaDesde.set($any($event.target).value)" />
         </div>
-        <div class="col-12 col-md-2">
+        <div>
           <label class="form-label">Hasta</label>
-          <input type="date" class="form-control" (change)="fechaHasta.set($any($event.target).value)" />
+          <input type="date" class="form-control" [value]="fechaHasta()" (change)="fechaHasta.set($any($event.target).value)" />
         </div>
-        <div class="col-12 col-md-2">
+        <div>
           <label class="form-label">Tipo</label>
-          <select class="form-select" (change)="tipo.set($any($event.target).value)">
+          <select class="form-select" [value]="tipo()" (change)="tipo.set($any($event.target).value)">
             <option value="">Todos</option>
             <option value="ENTRADA">Entrada</option>
             <option value="SALIDA">Salida</option>
           </select>
         </div>
-        <div class="col-12 col-md-3">
-          <button class="btn btn-primary w-100" (click)="buscar()" [disabled]="filtroInvalido()">Buscar</button>
+        <div>
+          <button class="btn btn-primary" (click)="buscar()" [disabled]="filtroInvalido()">Buscar</button>
+        </div>
+        <div class="ms-auto">
+          <button class="btn btn-outline-secondary" (click)="limpiarFiltros()">Limpiar</button>
         </div>
       </div>
       @if (filtroInvalido()) {
@@ -40,31 +48,37 @@
   </div>
 
   @if (cargando()) {
-    <div class="text-center py-4"><span class="spinner-border"></span></div>
+    <div class="card"><div class="card-body">
+      @for (i of [1,2,3]; track i) { <div class="skeleton mb-2" style="height:36px"></div> }
+    </div></div>
   } @else if (movimientos().length === 0) {
-    <div class="alert alert-info">Sin movimientos.</div>
+    <div class="empty-state"><i class="bi bi-inbox"></i><p>Sin movimientos.</p></div>
   } @else {
-    <div class="table-responsive">
-      <table class="table table-hover align-middle">
-        <thead>
-          <tr>
-            <th>Fecha</th><th>Tipo</th><th>Producto</th><th>Cantidad</th><th>Stock ant.</th><th>Stock post.</th><th>Motivo</th>
-          </tr>
-        </thead>
-        <tbody>
-          @for (m of movimientos(); track m.id) {
+    <div class="card">
+      <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+          <thead>
             <tr>
-              <td>{{ m.fecha | date:'short' }}</td>
-              <td><span class="badge" [class.text-bg-success]="m.tipo === 'ENTRADA'" [class.text-bg-warning]="m.tipo === 'SALIDA'">{{ m.tipo }}</span></td>
-              <td>{{ m.producto_codigo }}</td>
-              <td>{{ m.cantidad }}</td>
-              <td>{{ m.stock_anterior }}</td>
-              <td>{{ m.stock_posterior }}</td>
-              <td>{{ m.motivo }}</td>
+              <th>Fecha</th><th>Tipo</th><th>Producto</th><th>Cantidad</th><th>Stock ant.</th><th>Stock post.</th><th>Motivo</th>
             </tr>
-          }
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            @for (m of movimientos(); track m.id) {
+              <tr>
+                <td data-label="Fecha">{{ m.fecha | date:'dd/MM/yyyy HH:mm' }}</td>
+                <td data-label="Tipo">
+                  <span class="badge" [class.text-bg-success]="m.tipo === 'ENTRADA'" [class.text-bg-warning]="m.tipo === 'SALIDA'">{{ m.tipo }}</span>
+                </td>
+                <td data-label="Producto">{{ m.producto_codigo }}</td>
+                <td data-label="Cantidad" class="tabular-nums">{{ m.cantidad }}</td>
+                <td data-label="Stock ant." class="tabular-nums">{{ m.stock_anterior }}</td>
+                <td data-label="Stock post." class="tabular-nums">{{ m.stock_posterior }}</td>
+                <td data-label="Motivo">{{ m.motivo }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
     </div>
   }
 </div>

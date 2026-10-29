@@ -1,25 +1,41 @@
 <div class="container-fluid">
-  <h2 class="mb-3">Productos con stock bajo</h2>
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">Productos con stock bajo</h1>
+      <p class="page-subtitle">Productos que requieren reposición</p>
+    </div>
+  </div>
   @if (cargando()) {
-    <div class="text-center py-4"><span class="spinner-border"></span></div>
+    <div class="card"><div class="card-body">
+      @for (i of [1,2,3]; track i) { <div class="skeleton mb-2" style="height:36px"></div> }
+    </div></div>
   } @else if (productos().length === 0) {
-    <div class="alert alert-success">Todos los productos tienen stock suficiente.</div>
+    <div class="empty-state"><i class="bi bi-check-circle"></i><p>Todos los productos tienen stock suficiente.</p></div>
   } @else {
-    <div class="table-responsive">
-      <table class="table table-hover align-middle">
-        <thead><tr><th>Código</th><th>Nombre</th><th>Categoría</th><th>Stock</th><th>Mínimo</th></tr></thead>
-        <tbody>
-          @for (p of productos(); track p.id) {
-            <tr>
-              <td>{{ p.codigo }}</td>
-              <td>{{ p.nombre }}</td>
-              <td>{{ p.categoria_nombre }}</td>
-              <td><span class="badge text-bg-danger">{{ p.stock_actual }}</span></td>
-              <td>{{ p.stock_minimo }}</td>
-            </tr>
-          }
-        </tbody>
-      </table>
+    <div class="card">
+      <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+          <thead><tr><th>Código</th><th>Nombre</th><th>Categoría</th><th>Stock</th><th>Mínimo</th><th class="text-end">Acción</th></tr></thead>
+          <tbody>
+            @for (p of productos(); track p.id) {
+              <tr>
+                <td data-label="Código">{{ p.codigo }}</td>
+                <td data-label="Nombre">{{ p.nombre }}</td>
+                <td data-label="Categoría">{{ p.categoria_nombre }}</td>
+                <td data-label="Stock">
+                  <span class="badge" [class.text-bg-danger]="p.stock_actual === 0" [class.text-bg-warning]="p.stock_actual > 0">{{ p.stock_actual }}</span>
+                </td>
+                <td data-label="Mínimo">{{ p.stock_minimo }}</td>
+                <td data-label="Acción" class="text-end">
+                  <a class="btn btn-sm btn-outline-primary" routerLink="/movimientos/entrada" title="Reponer" aria-label="Reponer producto">
+                    <i class="bi bi-plus-lg"></i> Reponer
+                  </a>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
     </div>
   }
 </div>

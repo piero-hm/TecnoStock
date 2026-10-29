@@ -1,4 +1,5 @@
 import { Component, inject, OnInit, signal } from '@angular/core';
+import { RouterLink } from '@angular/router';
 import { Producto } from '../../interfaces';
 import { ProductoService } from '../../services/producto.service';
 
@@ -6,6 +7,7 @@ import { ProductoService } from '../../services/producto.service';
   selector: 'app-stock-bajo',
   templateUrl: './stock-bajo.component.html',
   styleUrl: './stock-bajo.component.css',
+  imports: [RouterLink],
 })
 export class StockBajoComponent implements OnInit {
   private productoService = inject(ProductoService);
