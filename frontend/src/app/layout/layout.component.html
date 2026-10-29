@@ -9,41 +9,50 @@
       <span>TecnoStock</span>
     </div>
 
-    <div class="sidebar-section">Principal</div>
-    <a class="sidebar-link" routerLink="/dashboard" routerLinkActive="active" (click)="cerrarMenu()">
-      <i class="bi bi-speedometer2"></i> Dashboard
-    </a>
+    <nav class="sidebar-nav">
+      <div class="sidebar-section">Principal</div>
+      <a class="sidebar-link" routerLink="/dashboard" routerLinkActive="active" (click)="cerrarMenu()">
+        <i class="bi bi-speedometer2"></i><span>Dashboard</span>
+      </a>
 
-    <div class="sidebar-section">Inventario</div>
-    <a class="sidebar-link" routerLink="/productos" routerLinkActive="active" (click)="cerrarMenu()">
-      <i class="bi bi-box-seam"></i> Productos
-    </a>
-    <a class="sidebar-link" routerLink="/categorias" routerLinkActive="active" (click)="cerrarMenu()">
-      <i class="bi bi-tags"></i> Categorías
-    </a>
+      <div class="sidebar-section">Inventario</div>
+      <a class="sidebar-link" routerLink="/productos" routerLinkActive="active" (click)="cerrarMenu()">
+        <i class="bi bi-box-seam"></i><span>Productos</span>
+      </a>
+      <a class="sidebar-link" routerLink="/categorias" routerLinkActive="active" (click)="cerrarMenu()">
+        <i class="bi bi-tags"></i><span>Categorías</span>
+      </a>
 
-    <div class="sidebar-section">Movimientos</div>
-    <a class="sidebar-link" routerLink="/movimientos/entrada" routerLinkActive="active" (click)="cerrarMenu()">
-      <i class="bi bi-arrow-down-circle"></i> Entrada
-    </a>
-    <a class="sidebar-link" routerLink="/movimientos/salida" routerLinkActive="active" (click)="cerrarMenu()">
-      <i class="bi bi-arrow-up-circle"></i> Salida
-    </a>
-    <a class="sidebar-link" routerLink="/movimientos" routerLinkActive="active" (click)="cerrarMenu()">
-      <i class="bi bi-clock-history"></i> Historial
-    </a>
+      <div class="sidebar-section">Movimientos</div>
+      <a class="sidebar-link" routerLink="/movimientos/entrada" routerLinkActive="active" (click)="cerrarMenu()">
+        <i class="bi bi-arrow-down-circle"></i><span>Entrada</span>
+      </a>
+      <a class="sidebar-link" routerLink="/movimientos/salida" routerLinkActive="active" (click)="cerrarMenu()">
+        <i class="bi bi-arrow-up-circle"></i><span>Salida</span>
+      </a>
+      <a class="sidebar-link" routerLink="/movimientos" routerLinkActive="active" (click)="cerrarMenu()">
+        <i class="bi bi-clock-history"></i><span>Historial</span>
+      </a>
 
-    <div class="sidebar-section">Alertas</div>
-    <a class="sidebar-link" routerLink="/stock-bajo" routerLinkActive="active" (click)="cerrarMenu()">
-      <i class="bi bi-exclamation-triangle"></i> Stock bajo
-      @if (stockBajoCount() > 0) {
-        <span class="sidebar-badge">{{ stockBajoCount() }}</span>
-      }
-    </a>
+      <div class="sidebar-section">Alertas</div>
+      <a class="sidebar-link" routerLink="/stock-bajo" routerLinkActive="active" (click)="cerrarMenu()">
+        <i class="bi bi-exclamation-triangle"></i><span>Stock bajo</span>
+        @if (stockBajoCount() > 0) {
+          <span class="sidebar-badge">{{ stockBajoCount() }}</span>
+        }
+      </a>
+    </nav>
 
     <div class="sidebar-footer">
-      <a class="sidebar-link" (click)="logout(); cerrarMenu()">
-        <i class="bi bi-box-arrow-right"></i> Cerrar sesión
+      <div class="sidebar-user">
+        <span class="avatar">{{ iniciales() }}</span>
+        <div class="sidebar-user-info">
+          <div class="sidebar-user-name">{{ usuario()?.nombre_completo }}</div>
+          <div class="sidebar-user-username">{{ usuario()?.username }}</div>
+        </div>
+      </div>
+      <a class="sidebar-link sidebar-logout" (click)="logout(); cerrarMenu()">
+        <i class="bi bi-box-arrow-right"></i><span>Cerrar sesión</span>
       </a>
     </div>
   </aside>
@@ -51,17 +60,13 @@
   <!-- Área principal -->
   <div class="main-area">
     <header class="topbar">
-      <div class="d-flex align-items-center gap-2">
-        <button class="btn btn-light hamburger" (click)="toggleMenu()" aria-label="Abrir menú">
+      <div class="topbar-left">
+        <button class="btn btn-icon hamburger" (click)="toggleMenu()" aria-label="Abrir menú">
           <i class="bi bi-list"></i>
         </button>
-        <h1 class="topbar-title mb-0">Panel de inventario</h1>
+        <div class="topbar-date">{{ fechaActual | date:'EEEE d MMMM yyyy' }}</div>
       </div>
       <div class="topbar-user">
-        <div class="text-end d-none d-sm-block">
-          <div class="fw-semibold small">{{ usuario()?.nombre_completo }}</div>
-          <div class="text-muted" style="font-size:11px">{{ usuario()?.username }}</div>
-        </div>
         <span class="avatar">{{ iniciales() }}</span>
       </div>
     </header>
@@ -71,6 +76,9 @@
     </main>
   </div>
 </div>
+
+<!-- Modal de confirmación -->
+<app-confirmacion-modal></app-confirmacion-modal>
 
 <!-- Toasts -->
 <div class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index: var(--z-toast);">

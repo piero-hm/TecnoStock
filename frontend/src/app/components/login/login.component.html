@@ -1,62 +1,48 @@
 <div class="login-shell">
-  <!-- Panel de marca -->
-  <div class="login-brand">
-    <div class="d-flex align-items-center gap-2 mb-4">
-      <span class="brand-icon" style="background:rgba(255,255,255,.15)"><i class="bi bi-cpu"></i></span>
-      <span class="fw-bold fs-5">TecnoStock</span>
+  <div class="login-card">
+    <div class="login-brand-mark">
+      <span class="brand-icon"><i class="bi bi-cpu"></i></span>
+      <span class="brand-name">TecnoStock</span>
     </div>
-    <h1>Inventario de equipos informáticos</h1>
-    <p class="mt-2">Controla stock, movimientos y alertas de tu tienda en un solo lugar.</p>
-    <div class="mt-4">
-      <div class="login-value"><i class="bi bi-box-seam"></i><span>Control de stock en tiempo real</span></div>
-      <div class="login-value"><i class="bi bi-clock-history"></i><span>Historial completo de movimientos</span></div>
-      <div class="login-value"><i class="bi bi-exclamation-triangle"></i><span>Alertas de stock bajo</span></div>
-    </div>
-  </div>
+    <h1 class="login-title">Bienvenido</h1>
+    <p class="login-subtitle">Ingresa tus credenciales para continuar</p>
 
-  <!-- Formulario -->
-  <div class="login-form-side">
-    <div class="login-card">
-      <h2 class="h4 mb-1">Bienvenido</h2>
-      <p class="text-muted mb-4">Ingresa tus credenciales para continuar</p>
+    @if (error()) {
+      <div class="alert alert-danger d-flex align-items-center gap-2 mb-3">
+        <i class="bi bi-exclamation-circle"></i>
+        <span>{{ error() }}</span>
+      </div>
+    }
 
-      @if (error()) {
-        <div class="alert alert-danger d-flex align-items-center gap-2">
-          <i class="bi bi-exclamation-circle"></i>
-          <span>{{ error() }}</span>
+    <form (submit)="onSubmit(); $event.preventDefault()">
+      <div class="mb-3">
+        <label class="form-label" for="username">Usuario</label>
+        <div class="input-icon-wrap">
+          <i class="bi bi-person"></i>
+          <input id="username" type="text" class="form-control"
+                 [class.is-invalid]="loginForm.username().touched() && loginForm.username().invalid()"
+                 [formField]="loginForm.username" />
         </div>
-      }
-
-      <form (submit)="onSubmit(); $event.preventDefault()">
-        <div class="mb-3">
-          <label class="form-label" for="username">Usuario</label>
-          <div class="input-icon-wrap">
-            <i class="bi bi-person"></i>
-            <input id="username" type="text" class="form-control"
-                   [class.is-invalid]="loginForm.username().touched() && loginForm.username().invalid()"
-                   [formField]="loginForm.username" />
-          </div>
-          @if (loginForm.username().touched() && loginForm.username().invalid()) {
-            <div class="invalid-feedback d-block">{{ loginForm.username().errors()?.[0]?.message }}</div>
-          }
+        @if (loginForm.username().touched() && loginForm.username().invalid()) {
+          <div class="invalid-feedback d-block">{{ loginForm.username().errors()?.[0]?.message }}</div>
+        }
+      </div>
+      <div class="mb-4">
+        <label class="form-label" for="password">Contraseña</label>
+        <div class="input-icon-wrap">
+          <i class="bi bi-lock"></i>
+          <input id="password" type="password" class="form-control"
+                 [class.is-invalid]="loginForm.password().touched() && loginForm.password().invalid()"
+                 [formField]="loginForm.password" />
         </div>
-        <div class="mb-4">
-          <label class="form-label" for="password">Contraseña</label>
-          <div class="input-icon-wrap">
-            <i class="bi bi-lock"></i>
-            <input id="password" type="password" class="form-control"
-                   [class.is-invalid]="loginForm.password().touched() && loginForm.password().invalid()"
-                   [formField]="loginForm.password" />
-          </div>
-          @if (loginForm.password().touched() && loginForm.password().invalid()) {
-            <div class="invalid-feedback d-block">{{ loginForm.password().errors()?.[0]?.message }}</div>
-          }
-        </div>
-        <button type="submit" class="btn btn-primary w-100" [disabled]="cargando()">
-          @if (cargando()) { <span class="spinner-border spinner-border-sm me-2"></span> }
-          Ingresar
-        </button>
-      </form>
-    </div>
+        @if (loginForm.password().touched() && loginForm.password().invalid()) {
+          <div class="invalid-feedback d-block">{{ loginForm.password().errors()?.[0]?.message }}</div>
+        }
+      </div>
+      <button type="submit" class="btn btn-primary w-100" [disabled]="cargando()">
+        @if (cargando()) { <span class="spinner-border spinner-border-sm me-2"></span> }
+        Ingresar
+      </button>
+    </form>
   </div>
 </div>

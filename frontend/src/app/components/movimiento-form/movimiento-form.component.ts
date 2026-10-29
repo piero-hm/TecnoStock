@@ -52,6 +52,13 @@ export class MovimientoFormComponent implements OnInit {
     return this.productos().find((p) => p.id === id) ?? null;
   });
 
+  readonly stockResultante = computed(() => {
+    const p = this.productoSeleccionado();
+    if (!p) return null;
+    const cant = Number(this.model().cantidad) || 0;
+    return this.tipo() === 'ENTRADA' ? p.stock_actual + cant : p.stock_actual - cant;
+  });
+
   ngOnInit(): void {
     const t = this.route.snapshot.data['tipo'];
     this.tipo.set(t === 'SALIDA' ? 'SALIDA' : 'ENTRADA');

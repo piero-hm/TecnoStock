@@ -3,6 +3,7 @@ import { RouterLink } from '@angular/router';
 import { Categoria, Producto } from '../../interfaces';
 import { CategoriaService } from '../../services/categoria.service';
 import { ProductoService } from '../../services/producto.service';
+import { ConfirmacionService } from '../../services/confirmacion.service';
 
 @Component({
   selector: 'app-producto-list',
@@ -13,6 +14,7 @@ import { ProductoService } from '../../services/producto.service';
 export class ProductoListComponent implements OnInit {
   private productoService = inject(ProductoService);
   private categoriaService = inject(CategoriaService);
+  private confirmacion = inject(ConfirmacionService);
 
   readonly productos = signal<Producto[]>([]);
   readonly categorias = signal<Categoria[]>([]);
@@ -45,6 +47,13 @@ export class ProductoListComponent implements OnInit {
     this.cargar();
   }
 
+  limpiarFiltros(): void {
+    this.busqueda.set('');
+    this.categoriaId.set(null);
+    this.incluirInactivos.set(false);
+    this.cargar();
+  }
+
   cargar(): void {
     this.cargando.set(true);
     this.productoService.listar(this.busqueda() || null, this.categoriaId(), this.incluirInactivos()).subscribe({
@@ -56,7 +65,9 @@ export class ProductoListComponent implements OnInit {
     });
   }
 
-  toggleActivo(p: Producto): void {
+  async toggleActivo(p: Producto): Promise<void> {
+    const ok = await this.confirmacion.confirmar(p.activo ? '¿Desactivar este producto?' : '¿Activar este producto?');
+    if (!ok) return;
     const accion = p.activo ? this.productoService.desactivar(p.id) : this.productoService.activar(p.id);
     accion.subscribe({ next: () => this.cargar() });
   }

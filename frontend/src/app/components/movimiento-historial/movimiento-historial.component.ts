@@ -28,6 +28,14 @@ export class MovimientoHistorialComponent implements OnInit {
     return !!this.fechaDesde() && !!this.fechaHasta() && this.fechaDesde() > this.fechaHasta();
   });
 
+  limpiarFiltros(): void {
+    this.productoId.set(null);
+    this.fechaDesde.set('');
+    this.fechaHasta.set('');
+    this.tipo.set('');
+    this.buscar();
+  }
+
   toNumber(v: string): number { return Number(v); }
 
   ngOnInit(): void {

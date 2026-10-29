@@ -1,5 +1,10 @@
 <div class="container-fluid">
-  <h2 class="mb-3">{{ esEdicion() ? 'Editar producto' : 'Nuevo producto' }}</h2>
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">{{ esEdicion() ? 'Editar producto' : 'Nuevo producto' }}</h1>
+      <p class="page-subtitle">Completa los datos del producto</p>
+    </div>
+  </div>
 
   @if (cargando()) {
     <div class="text-center py-4"><span class="spinner-border"></span></div>
@@ -7,6 +12,7 @@
     <div class="card shadow-sm">
       <div class="card-body">
         <form (submit)="onSubmit(); $event.preventDefault()">
+          <h3 class="h6 mb-3">Datos del producto</h3>
           <div class="row g-3">
             <div class="col-12 col-md-4">
               <label class="form-label" for="codigo">Código</label>

@@ -1,0 +1,75 @@
+<div class="chart-card">
+  @if (datos().length === 0 || totalCero()) {
+    <div class="empty-state">
+      <i class="bi bi-graph-up"></i>
+      <p>Sin movimientos en este rango.</p>
+    </div>
+  } @else {
+    <div class="chart-wrap" role="img" [attr.aria-label]="ariaLabel()">
+      <svg [attr.viewBox]="'0 0 ' + ancho + ' ' + alto" class="chart-svg">
+        <defs>
+          <linearGradient [attr.id]="'grad-entradas'" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#b6f24a" stop-opacity="0.35" />
+            <stop offset="100%" stop-color="#b6f24a" stop-opacity="0" />
+          </linearGradient>
+          <linearGradient [attr.id]="'grad-salidas'" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#fbbf24" stop-opacity="0.3" />
+            <stop offset="100%" stop-color="#fbbf24" stop-opacity="0" />
+          </linearGradient>
+        </defs>
+
+        <!-- líneas guía -->
+        @for (g of lineasGuia(); track g.y) {
+          <line [attr.x1]="paddingX" [attr.y1]="g.y" [attr.x2]="ancho - paddingX" [attr.y2]="g.y"
+                stroke="#26352f" stroke-dasharray="4 4" stroke-width="1" />
+          <text [attr.x]="paddingX - 8" [attr.y]="g.y + 4" text-anchor="end" class="axis-label">{{ g.valor }}</text>
+        }
+
+        <!-- áreas -->
+        <path [attr.d]="areaEntradas()" [attr.fill]="'url(#grad-entradas)'" />
+        <path [attr.d]="areaSalidas()" [attr.fill]="'url(#grad-salidas)'" />
+
+        <!-- líneas -->
+        <path [attr.d]="pathEntradas()" fill="none" stroke="#b6f24a" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
+        <path [attr.d]="pathSalidas()" fill="none" stroke="#fbbf24" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
+
+        <!-- puntos hover -->
+        @for (d of datos(); track d.fecha; let i = $index) {
+          <circle [attr.cx]="xDe(i)" [attr.cy]="yDeEntradas(i)" r="4" fill="#b6f24a" class="dot"
+                  (mouseenter)="onMove($event, i)" (mouseleave)="onLeave()" />
+          <circle [attr.cx]="xDe(i)" [attr.cy]="yDeSalidas(i)" r="4" fill="#fbbf24" class="dot"
+                  (mouseenter)="onMove($event, i)" (mouseleave)="onLeave()" />
+        }
+
+        <!-- etiquetas X -->
+        @for (e of etiquetasX(); track e.x) {
+          <text [attr.x]="e.x" [attr.y]="alto - 4" text-anchor="middle" class="axis-label">{{ e.texto }}</text>
+        }
+      </svg>
+
+      @if (puntoHover(); as h) {
+        <div class="chart-tooltip" [style.left.%]="(h.x / ancho) * 100" [style.top.%]="(tooltipTop() / alto) * 100">
+          <div class="tooltip-date">{{ formatearFecha(h.fecha) }}</div>
+          <div class="tooltip-row"><span class="dot-legend dot-entrada"></span> Entradas: {{ h.entradas }}</div>
+          <div class="tooltip-row"><span class="dot-legend dot-salida"></span> Salidas: {{ h.salidas }}</div>
+        </div>
+      }
+    </div>
+
+    <div class="chart-legend">
+      <span><span class="legend-swatch" style="background:#b6f24a"></span> Entradas</span>
+      <span><span class="legend-swatch" style="background:#fbbf24"></span> Salidas</span>
+    </div>
+  }
+
+  <!-- tabla alternativa accesible -->
+  <table class="visually-hidden">
+    <caption>Entradas y salidas por día</caption>
+    <thead><tr><th>Fecha</th><th>Entradas</th><th>Salidas</th></tr></thead>
+    <tbody>
+      @for (d of datos(); track d.fecha) {
+        <tr><td>{{ d.fecha }}</td><td>{{ d.entradas }}</td><td>{{ d.salidas }}</td></tr>
+      }
+    </tbody>
+  </table>
+</div>

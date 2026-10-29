@@ -1,0 +1,12 @@
+@if (confirmacion.visible()) {
+  <div class="modal-backdrop-custom" (click)="confirmacion.cancelar()">
+    <div class="modal-card" (click)="$event.stopPropagation()">
+      <h3 class="h5 mb-2">Confirmar acción</h3>
+      <p class="mb-4">{{ confirmacion.mensaje() }}</p>
+      <div class="d-flex gap-2 justify-content-end">
+        <button class="btn btn-outline-secondary" (click)="confirmacion.cancelar()">Cancelar</button>
+        <button class="btn btn-danger" (click)="confirmacion.aceptar()">Confirmar</button>
+      </div>
+    </div>
+  </div>
+}
