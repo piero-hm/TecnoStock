@@ -7,7 +7,7 @@ import { NavigationEnd } from '@angular/router';
 import { AuthService } from '../services/auth.service';
 import { ConfirmacionModalComponent } from '../components/confirmacion-modal/confirmacion-modal.component';
 import { NotificacionService } from '../services/notificacion.service';
-import { ProductoService } from '../services/producto.service';
+import { AlertasStockService } from '../services/alertas-stock.service';
 
 @Component({
   selector: 'app-layout',
@@ -18,11 +18,11 @@ export class LayoutComponent implements OnInit {
   private auth = inject(AuthService);
   private router = inject(Router);
   readonly notificaciones = inject(NotificacionService);
-  private productoService = inject(ProductoService);
+  readonly alertas = inject(AlertasStockService);
 
   readonly usuario = this.auth.usuario;
   readonly menuAbierto = signal(false);
-  readonly stockBajoCount = signal(0);
+  readonly stockBajoCount = this.alertas.contador;
   readonly fechaActual = new Date();
 
   private readonly urlActual = toSignal(
@@ -52,9 +52,10 @@ export class LayoutComponent implements OnInit {
   });
 
   ngOnInit(): void {
-    this.productoService.stockBajo().subscribe({
-      next: (data) => this.stockBajoCount.set(data.length),
-    });
+    this.alertas.refrescar();
+    this.router.events
+      .pipe(filter((e): e is NavigationEnd => e instanceof NavigationEnd))
+      .subscribe(() => this.alertas.refrescar());
   }
 
   toggleMenu(): void {

@@ -1,12 +1,15 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
+import { tap } from 'rxjs/operators';
 import { environment } from '../../environments/environment';
 import { Producto, ProductoCreate } from '../interfaces';
+import { AlertasStockService } from './alertas-stock.service';
 
 @Injectable({ providedIn: 'root' })
 export class ProductoService {
   private readonly url = `${environment.apiUrl}/productos`;
+  private readonly alertas = inject(AlertasStockService);
 
   constructor(private http: HttpClient) {}
 
@@ -27,18 +30,18 @@ export class ProductoService {
   }
 
   crear(data: ProductoCreate): Observable<Producto> {
-    return this.http.post<Producto>(this.url, data);
+    return this.http.post<Producto>(this.url, data).pipe(tap(() => this.alertas.refrescar()));
   }
 
   actualizar(id: number, data: ProductoCreate): Observable<Producto> {
-    return this.http.put<Producto>(`${this.url}/${id}`, data);
+    return this.http.put<Producto>(`${this.url}/${id}`, data).pipe(tap(() => this.alertas.refrescar()));
   }
 
   desactivar(id: number): Observable<Producto> {
-    return this.http.patch<Producto>(`${this.url}/${id}/desactivar`, {});
+    return this.http.patch<Producto>(`${this.url}/${id}/desactivar`, {}).pipe(tap(() => this.alertas.refrescar()));
   }
 
   activar(id: number): Observable<Producto> {
-    return this.http.patch<Producto>(`${this.url}/${id}/activar`, {});
+    return this.http.patch<Producto>(`${this.url}/${id}/activar`, {}).pipe(tap(() => this.alertas.refrescar()));
   }
 }

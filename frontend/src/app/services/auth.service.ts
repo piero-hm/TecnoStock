@@ -1,14 +1,16 @@
 import { HttpClient } from '@angular/common/http';
-import { Injectable, computed, signal } from '@angular/core';
+import { Injectable, computed, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { Observable, tap } from 'rxjs';
 import { environment } from '../../environments/environment';
 import { LoginRequest, LoginResponse, Usuario } from '../interfaces';
+import { AlertasStockService } from './alertas-stock.service';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
   private readonly tokenKey = 'tecnostock_token';
   private readonly usuarioSignal = signal<Usuario | null>(this.leerUsuario());
+  private readonly alertas = inject(AlertasStockService);
 
   readonly usuario = this.usuarioSignal.asReadonly();
   readonly estaAutenticado = computed(() => this.usuarioSignal() !== null && this.token() !== null);
@@ -42,6 +44,7 @@ export class AuthService {
           // ignore storage errors
         }
         this.usuarioSignal.set(res.usuario);
+        this.alertas.refrescar();
       }),
     );
   }
@@ -54,6 +57,7 @@ export class AuthService {
       // ignore
     }
     this.usuarioSignal.set(null);
+    this.alertas.resetear();
     this.router.navigate(['/login']);
   }
 
